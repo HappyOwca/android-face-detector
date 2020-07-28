@@ -10,6 +10,13 @@ android {
         targetSdkVersion 30
         versionCode 1
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 
 dependencies {
@@ -22,5 +29,6 @@ dependencies {
 
     // Android face detector
 //    implementation "com.github.husaynhakeem:android-face-detector:2.0" // Remote
-    implementation(project(":facedetector")) // Local
+    implementation(project(":facedetector"))
+
 }
