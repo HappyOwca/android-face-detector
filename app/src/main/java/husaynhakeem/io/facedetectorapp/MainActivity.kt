@@ -1,7 +1,11 @@
 package husaynhakeem.io.facedetectorapp
 
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.util.Size
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.otaliastudios.cameraview.Facing
 import husaynhakeem.io.facedetector.FaceDetector
@@ -15,8 +19,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val smillingView: TextView  = findViewById(R.id.smillingValue)
+        val smillingPicture: ImageView = findViewById(R.id.imageWhenSmilling)
+        smillingView.setTextColor(Color.RED)
+
+
         val lensFacing =
-            savedInstanceState?.getSerializable(KEY_LENS_FACING) as Facing? ?: Facing.BACK
+            savedInstanceState?.getSerializable(KEY_LENS_FACING) as Facing? ?: Facing.FRONT
         setupCamera(lensFacing)
     }
 
@@ -41,7 +50,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCamera(lensFacing: Facing) {
-        val faceDetector = FaceDetector(faceBoundsOverlay)
+        val faceDetector = FaceDetector(faceBoundsOverlay, findViewById(R.id.smillingValue),
+            findViewById(R.id.imageWhenSmilling)) // change to list or smth
         viewfinder.facing = lensFacing
         viewfinder.addFrameProcessor {
             faceDetector.process(

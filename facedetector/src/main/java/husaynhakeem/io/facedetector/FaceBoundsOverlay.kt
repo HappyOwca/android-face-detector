@@ -20,6 +20,7 @@ class FaceBoundsOverlay @JvmOverloads constructor(ctx: Context, attrs: Attribute
     private val facesBounds = mutableListOf<FaceBounds>()
     private val anchorPaint = Paint()
     private val idPaint = Paint()
+    private val smilePaint = Paint()
     private val boundsPaint = Paint()
 
     init {
@@ -27,6 +28,9 @@ class FaceBoundsOverlay @JvmOverloads constructor(ctx: Context, attrs: Attribute
 
         idPaint.color = ContextCompat.getColor(context, android.R.color.holo_blue_dark)
         idPaint.textSize = 40f
+
+        smilePaint.color = ContextCompat.getColor(context, android.R.color.holo_green_light)
+        smilePaint.textSize = 40f
 
         boundsPaint.style = Paint.Style.STROKE
         boundsPaint.color = ContextCompat.getColor(context, android.R.color.holo_blue_dark)
@@ -44,6 +48,7 @@ class FaceBoundsOverlay @JvmOverloads constructor(ctx: Context, attrs: Attribute
         facesBounds.forEach { faceBounds ->
             canvas.drawAnchor(faceBounds.box.center())
             canvas.drawId(faceBounds.id.toString(), faceBounds.box.center())
+            canvas.drawSmileProbability(faceBounds.smileProb.toString(), faceBounds.box.center())
             canvas.drawBounds(faceBounds.box)
         }
     }
@@ -56,6 +61,11 @@ class FaceBoundsOverlay @JvmOverloads constructor(ctx: Context, attrs: Attribute
     /** Draws (Writes) the face's id. */
     private fun Canvas.drawId(faceId: String, center: PointF) {
         drawText("face id $faceId", center.x - ID_OFFSET, center.y + ID_OFFSET, idPaint)
+    }
+
+    /** Draws (Writes) the smile probability. */
+    private fun Canvas.drawSmileProbability(smileProbability: String, center: PointF) {
+        drawText("smile probability $smileProbability", center.x - SMILE_OFFSET, center.y + SMILE_OFFSET, smilePaint)
     }
 
     /** Draws bounds around a face as a rectangle. */
@@ -72,5 +82,6 @@ class FaceBoundsOverlay @JvmOverloads constructor(ctx: Context, attrs: Attribute
     companion object {
         private const val ANCHOR_RADIUS = 10f
         private const val ID_OFFSET = 50f
+        private const val SMILE_OFFSET = 100f
     }
 }

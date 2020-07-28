@@ -2,8 +2,11 @@ package husaynhakeem.io.facedetector
 
 import android.graphics.RectF
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.GuardedBy
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import com.google.mlkit.vision.common.InputImage
@@ -14,13 +17,20 @@ import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
+
+class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay,
+                   private val smileTextView: TextView,
+                   private val smillingPicture: ImageView) {
+
+    private var startTime = SystemClock.elapsedRealtime()
+    private var endTime = SystemClock.elapsedRealtime()
+    private var isSmillling = false
 
     private val mlkitFaceDetector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
-            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
             .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
             .setMinFaceSize(MIN_FACE_SIZE)
             .enableTracking()
             .build()
@@ -40,6 +50,8 @@ class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
 
     @GuardedBy("lock")
     private var isProcessing = false
+
+    private var smilingValue: Float = 0.0F
 
     init {
         faceBoundsOverlay.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -133,17 +145,74 @@ class FaceDetector(private val faceBoundsOverlay: FaceBoundsOverlay) {
         val scaledBottom = scaleY * boundingBox.bottom
         val scaledBoundingBox = RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
 
+        setSmilingValue(smilingProbability)
+        var smillingVerdict = "Initialization"
+
+        if (getSmilingValue() > 0.7F)
+        {
+
+            smillingPicture.visibility = View.VISIBLE
+            if (isSmillling != true)
+            {
+                startTime = SystemClock.elapsedRealtime()
+                endTime = SystemClock.elapsedRealtime()
+            }
+            else
+            {
+                endTime = SystemClock.elapsedRealtime()
+            }
+            isSmillling = true
+            var smileTime = (endTime - startTime)/1000.0F
+
+            smillingVerdict =  "YAY YOU ARE SMILLING FOR:$smileTime !"
+        }
+        else
+        {
+            if (isSmillling == true)
+            {
+                startTime = SystemClock.elapsedRealtime()
+                endTime = SystemClock.elapsedRealtime()
+            }
+            else
+            {
+                endTime = SystemClock.elapsedRealtime()
+            }
+            isSmillling = false
+            var smileTime = (endTime - startTime)/1000.0F
+
+            smillingVerdict =  "WHY SO SAD MAN NOT SMILLING FOR: $smileTime?"
+            smillingPicture.visibility = View.GONE
+
+        }
+
+        smileTextView.text = "$smillingVerdict"
+
         // Return the scaled bounding box and a tracking id of the detected face. The tracking id
         // remains the same as long as the same face continues to be detected.
         return FaceBounds(
             trackingId,
-            scaledBoundingBox
+            scaledBoundingBox,
+            smilingValue
         )
     }
 
     private fun onError(exception: Exception) {
         onFaceDetectionResultListener?.onFailure(exception)
         Log.e(TAG, "An error occurred while running a face detection", exception)
+    }
+
+    private fun setSmilingValue(smilingProbability: Float?)
+    {
+        if (smilingProbability != null) {
+            smilingValue = smilingProbability
+        }
+        //Log.d(TAG, "smile after set:$smilingValue")
+    }
+
+    fun getSmilingValue(): Float
+    {
+        //Log.d(TAG, "smile in get:$smilingValue")
+        return smilingValue
     }
 
     /**
