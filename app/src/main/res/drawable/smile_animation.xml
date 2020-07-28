@@ -1,0 +1,6 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="true">
+    <item android:drawable="@drawable/sad_face" android:duration="200" />
+    <item android:drawable="@drawable/poker_face" android:duration="200" />
+    <item android:drawable="@drawable/smilling_face" android:duration="200" />
+</animation-list>
